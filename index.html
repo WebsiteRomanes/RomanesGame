@@ -19,7 +19,6 @@
     margin: 0 0 20px 0;
   }
 
-  /* Zettel-Knopf (oben mittig) */
   #zettel {
     padding: 10px 16px;
     background: #fffbe6;
@@ -30,7 +29,13 @@
     box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
   }
 
-  /* Spielbereich */
+  #musicBtn {
+    margin-top: 10px;
+    padding: 8px 14px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
   #gameArea {
     width: 500px;
     height: 300px;
@@ -50,12 +55,11 @@
     left: 0;
   }
 
-  /* Credits: fixed links, vertikal zentriert */
   #credits {
     position: fixed;
-    left: 16px;                /* Abstand von linker Bildschirmkante */
-    top: 50%;                  /* vertikale Mitte */
-    transform: translate(-120%, -50%); /* außerhalb links verstecken */
+    left: 16px;
+    top: 50%;
+    transform: translate(-120%, -50%);
     transition: transform 0.35s ease, opacity 0.35s ease;
     opacity: 0;
     background: #fffbe6;
@@ -67,7 +71,6 @@
     width: 180px;
   }
 
-  /* wenn sichtbar -> reingleiten */
   #credits.visible {
     transform: translate(0, -50%);
     opacity: 1;
@@ -85,78 +88,51 @@
   }
 
   #credits button.close {
-    display: inline-block;
     padding: 6px 8px;
     font-size: 13px;
     cursor: pointer;
-    border-radius: 5px;
-    border: 1px solid #aaa;
-    background: white;
   }
 </style>
 </head>
 <body>
 
-  <h1>Hallo</h1>
+<h1>Hallo</h1>
 
-  <!-- Zettel-Knopf -->
-  <button id="zettel">📄 Credits (Zettel)</button>
+<button id="zettel">📄 Credits (Zettel)</button>
+<button id="musicBtn">🎵 Musik starten</button>
 
-  <!-- Spielbereich -->
-  <div id="gameArea">
-    <div id="player"></div>
-  </div>
+<audio id="bgMusic" loop>
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
 
-  <!-- Credits: fixed, links mittig -->
-  <aside id="credits" aria-hidden="true">
-    <h3>Credits</h3>
-    <p>Romanes</p>
-    <button class="close">Schließen</button>
-  </aside>
+<div id="gameArea">
+  <div id="player"></div>
+</div>
+
+<aside id="credits" aria-hidden="true">
+  <h3>Credits</h3>
+  <p>Romanes</p>
+  <button class="close">Schließen</button>
+</aside>
 
 <script>
-  // Elemente
   const player = document.getElementById("player");
   const gameArea = document.getElementById("gameArea");
 
-  // Position & Richtung (2D)
-  let posX = 0;
-  let posY = 0;
-  let dirX = 1; // 1 = rechts, -1 = links
-  let dirY = 1; // 1 = runter, -1 = hoch
-
-  // Geschwindigkeit (Pixel pro Frame)
-  const speedX = 2;
-  const speedY = 1.5;
+  let posX = 0, posY = 0;
+  let dirX = 1, dirY = 1;
+  const speedX = 2, speedY = 1.5;
 
   function animatePlayer() {
-    // aktuelle Grenzen (falls Fenster/Container sich ändert)
     const maxX = gameArea.clientWidth - player.offsetWidth;
     const maxY = gameArea.clientHeight - player.offsetHeight;
 
-    // Position aktualisieren
     posX += dirX * speedX;
     posY += dirY * speedY;
 
-    // Kollisionen mit Wänden — Richtung umkehren
-    if (posX >= maxX) {
-      posX = maxX;
-      dirX = -1;
-    }
-    if (posX <= 0) {
-      posX = 0;
-      dirX = 1;
-    }
-    if (posY >= maxY) {
-      posY = maxY;
-      dirY = -1;
-    }
-    if (posY <= 0) {
-      posY = 0;
-      dirY = 1;
-    }
+    if (posX >= maxX || posX <= 0) dirX *= -1;
+    if (posY >= maxY || posY <= 0) dirY *= -1;
 
-    // Anwenden
     player.style.left = posX + "px";
     player.style.top = posY + "px";
 
@@ -164,33 +140,29 @@
   }
   animatePlayer();
 
-  // Credits öffnen / schließen (slide-in von links)
   const zettelBtn = document.getElementById("zettel");
   const credits = document.getElementById("credits");
   const closeBtn = credits.querySelector(".close");
 
-  function showCredits(show) {
-    if (show) {
-      credits.classList.add("visible");
-      credits.setAttribute("aria-hidden", "false");
-      zettelBtn.textContent = "📄 Zettel schließen";
+  zettelBtn.onclick = () => credits.classList.toggle("visible");
+  closeBtn.onclick = () => credits.classList.remove("visible");
+
+  const music = document.getElementById("bgMusic");
+  const musicBtn = document.getElementById("musicBtn");
+  let playing = false;
+
+  music.volume = 0.3;
+
+  musicBtn.onclick = () => {
+    if (!playing) {
+      music.play();
+      musicBtn.textContent = "⏸️ Musik stoppen";
     } else {
-      credits.classList.remove("visible");
-      credits.setAttribute("aria-hidden", "true");
-      zettelBtn.textContent = "📄 Credits (Zettel)";
+      music.pause();
+      musicBtn.textContent = "🎵 Musik starten";
     }
-  }
-
-  zettelBtn.addEventListener("click", () => {
-    showCredits(!credits.classList.contains("visible"));
-  });
-
-  closeBtn.addEventListener("click", () => showCredits(false));
-
-  // Escape-Taste schließt ebenfalls
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") showCredits(false);
-  });
+    playing = !playing;
+  };
 </script>
 
 </body>
