@@ -53,9 +53,9 @@
   /* Credits: fixed links, vertikal zentriert */
   #credits {
     position: fixed;
-    left: 16px;                /* Abstand von linker Bildschirmkante */
-    top: 50%;                  /* vertikale Mitte */
-    transform: translate(-120%, -50%); /* außerhalb links verstecken */
+    left: 16px;
+    top: 50%;
+    transform: translate(-120%, -50%);
     transition: transform 0.35s ease, opacity 0.35s ease;
     opacity: 0;
     background: #fffbe6;
@@ -67,7 +67,6 @@
     width: 180px;
   }
 
-  /* wenn sichtbar -> reingleiten */
   #credits.visible {
     transform: translate(0, -50%);
     opacity: 1;
@@ -122,41 +121,24 @@
   // Position & Richtung (2D)
   let posX = 0;
   let posY = 0;
-  let dirX = 1; // 1 = rechts, -1 = links
-  let dirY = 1; // 1 = runter, -1 = hoch
+  let dirX = 1;
+  let dirY = 1;
 
-  // Geschwindigkeit (Pixel pro Frame)
   const speedX = 2;
   const speedY = 1.5;
 
   function animatePlayer() {
-    // aktuelle Grenzen (falls Fenster/Container sich ändert)
     const maxX = gameArea.clientWidth - player.offsetWidth;
     const maxY = gameArea.clientHeight - player.offsetHeight;
 
-    // Position aktualisieren
     posX += dirX * speedX;
     posY += dirY * speedY;
 
-    // Kollisionen mit Wänden — Richtung umkehren
-    if (posX >= maxX) {
-      posX = maxX;
-      dirX = -1;
-    }
-    if (posX <= 0) {
-      posX = 0;
-      dirX = 1;
-    }
-    if (posY >= maxY) {
-      posY = maxY;
-      dirY = -1;
-    }
-    if (posY <= 0) {
-      posY = 0;
-      dirY = 1;
-    }
+    if (posX >= maxX) { posX = maxX; dirX = -1; }
+    if (posX <= 0) { posX = 0; dirX = 1; }
+    if (posY >= maxY) { posY = maxY; dirY = -1; }
+    if (posY <= 0) { posY = 0; dirY = 1; }
 
-    // Anwenden
     player.style.left = posX + "px";
     player.style.top = posY + "px";
 
@@ -164,7 +146,7 @@
   }
   animatePlayer();
 
-  // Credits öffnen / schließen (slide-in von links)
+  // Credits öffnen / schließen
   const zettelBtn = document.getElementById("zettel");
   const credits = document.getElementById("credits");
   const closeBtn = credits.querySelector(".close");
@@ -186,10 +168,20 @@
   });
 
   closeBtn.addEventListener("click", () => showCredits(false));
-
-  // Escape-Taste schließt ebenfalls
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") showCredits(false);
+  });
+
+  // Musik einbauen
+  const backgroundMusic = new Audio('neymar_song.mp3');
+  backgroundMusic.loop = true;
+  let musicStarted = false;
+
+  document.addEventListener("keydown", () => {
+    if (!musicStarted) {
+      backgroundMusic.play();
+      musicStarted = true;
+    }
   });
 </script>
 
