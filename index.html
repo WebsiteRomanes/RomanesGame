@@ -19,6 +19,34 @@
     margin: 0 0 20px 0;
   }
 
+  /* Login/Register Bereich */
+  #authForm {
+    margin-bottom: 20px;
+    padding: 20px;
+    border: 2px solid #d1c788;
+    border-radius: 10px;
+    background: #fffbe6;
+    width: 300px;
+    text-align: center;
+  }
+
+  #authForm input {
+    width: 90%;
+    padding: 8px;
+    margin: 6px 0;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+  }
+
+  #authForm button {
+    padding: 8px 12px;
+    margin-top: 10px;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+    cursor: pointer;
+    background: #fff;
+  }
+
   /* Zettel-Knopf (oben mittig) */
   #zettel {
     padding: 10px 16px;
@@ -50,12 +78,12 @@
     left: 0;
   }
 
-  /* Credits: fixed links, vertikal zentriert */
+  /* Credits */
   #credits {
     position: fixed;
-    left: 16px;                /* Abstand von linker Bildschirmkante */
-    top: 50%;                  /* vertikale Mitte */
-    transform: translate(-120%, -50%); /* außerhalb links verstecken */
+    left: 16px;
+    top: 50%;
+    transform: translate(-120%, -50%);
     transition: transform 0.35s ease, opacity 0.35s ease;
     opacity: 0;
     background: #fffbe6;
@@ -67,7 +95,6 @@
     width: 180px;
   }
 
-  /* wenn sichtbar -> reingleiten */
   #credits.visible {
     transform: translate(0, -50%);
     opacity: 1;
@@ -99,6 +126,16 @@
 
   <h1>Hallo</h1>
 
+  <!-- Registrierung / Anmeldung -->
+  <div id="authForm">
+    <h3 id="authTitle">Anmelden</h3>
+    <input type="text" id="username" placeholder="Benutzername" />
+    <input type="password" id="password" placeholder="Passwort" />
+    <button id="authButton">Anmelden</button>
+    <p id="toggleAuth" style="cursor:pointer;color:blue;margin-top:10px;">Noch kein Konto? Registrieren</p>
+    <p id="authMessage" style="color:red;margin-top:6px;"></p>
+  </div>
+
   <!-- Zettel-Knopf -->
   <button id="zettel">📄 Credits (Zettel)</button>
 
@@ -107,7 +144,7 @@
     <div id="player"></div>
   </div>
 
-  <!-- Credits: fixed, links mittig -->
+  <!-- Credits -->
   <aside id="credits" aria-hidden="true">
     <h3>Credits</h3>
     <p>Romanes</p>
@@ -115,60 +152,31 @@
   </aside>
 
 <script>
-  // Elemente
+  // --- Spielerbewegung ---
   const player = document.getElementById("player");
   const gameArea = document.getElementById("gameArea");
-
-  // Position & Richtung (2D)
-  let posX = 0;
-  let posY = 0;
-  let dirX = 1; // 1 = rechts, -1 = links
-  let dirY = 1; // 1 = runter, -1 = hoch
-
-  // Geschwindigkeit (Pixel pro Frame)
-  const speedX = 2;
-  const speedY = 1.5;
+  let posX = 0, posY = 0, dirX = 1, dirY = 1;
+  const speedX = 2, speedY = 1.5;
 
   function animatePlayer() {
-    // aktuelle Grenzen (falls Fenster/Container sich ändert)
     const maxX = gameArea.clientWidth - player.offsetWidth;
     const maxY = gameArea.clientHeight - player.offsetHeight;
-
-    // Position aktualisieren
     posX += dirX * speedX;
     posY += dirY * speedY;
-
-    // Kollisionen mit Wänden — Richtung umkehren
-    if (posX >= maxX) {
-      posX = maxX;
-      dirX = -1;
-    }
-    if (posX <= 0) {
-      posX = 0;
-      dirX = 1;
-    }
-    if (posY >= maxY) {
-      posY = maxY;
-      dirY = -1;
-    }
-    if (posY <= 0) {
-      posY = 0;
-      dirY = 1;
-    }
-
-    // Anwenden
+    if (posX >= maxX) { posX = maxX; dirX = -1; }
+    if (posX <= 0) { posX = 0; dirX = 1; }
+    if (posY >= maxY) { posY = maxY; dirY = -1; }
+    if (posY <= 0) { posY = 0; dirY = 1; }
     player.style.left = posX + "px";
     player.style.top = posY + "px";
-
     requestAnimationFrame(animatePlayer);
   }
   animatePlayer();
 
-  // Credits öffnen / schließen (slide-in von links)
+  // --- Credits ---
   const zettelBtn = document.getElementById("zettel");
   const credits = document.getElementById("credits");
   const closeBtn = credits.querySelector(".close");
-
   function showCredits(show) {
     if (show) {
       credits.classList.add("visible");
@@ -180,19 +188,59 @@
       zettelBtn.textContent = "📄 Credits (Zettel)";
     }
   }
+  zettelBtn.addEventListener("click", () => showCredits(!credits.classList.contains("visible")));
+  closeBtn.addEventListener("click", () => showCredits(false));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") showCredits(false); });
 
-  zettelBtn.addEventListener("click", () => {
-    showCredits(!credits.classList.contains("visible"));
+  // --- Registrierung / Anmeldung ---
+  let isLogin = true;
+  const authTitle = document.getElementById("authTitle");
+  const authButton = document.getElementById("authButton");
+  const toggleAuth = document.getElementById("toggleAuth");
+  const authMessage = document.getElementById("authMessage");
+  const usernameInput = document.getElementById("username");
+  const passwordInput = document.getElementById("password");
+
+  toggleAuth.addEventListener("click", () => {
+    isLogin = !isLogin;
+    authTitle.textContent = isLogin ? "Anmelden" : "Registrieren";
+    authButton.textContent = isLogin ? "Anmelden" : "Registrieren";
+    toggleAuth.textContent = isLogin ? "Noch kein Konto? Registrieren" : "Bereits registriert? Anmelden";
+    authMessage.textContent = "";
   });
 
-  closeBtn.addEventListener("click", () => showCredits(false));
+  authButton.addEventListener("click", () => {
+    const user = usernameInput.value.trim();
+    const pass = passwordInput.value.trim();
+    if (!user || !pass) { authMessage.textContent = "Bitte alles ausfüllen!"; return; }
 
-  // Escape-Taste schließt ebenfalls
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") showCredits(false);
+    const users = JSON.parse(localStorage.getItem("users") || "{}");
+
+    if (isLogin) {
+      if (users[user] && users[user] === pass) {
+        authMessage.style.color = "green";
+        authMessage.textContent = `Willkommen zurück, ${user}!`;
+      } else {
+        authMessage.style.color = "red";
+        authMessage.textContent = "Falscher Benutzername oder Passwort!";
+      }
+    } else {
+      if (users[user]) {
+        authMessage.style.color = "red";
+        authMessage.textContent = "Benutzername existiert schon!";
+      } else {
+        users[user] = pass;
+        localStorage.setItem("users", JSON.stringify(users));
+        authMessage.style.color = "green";
+        authMessage.textContent = "Registrierung erfolgreich! Du kannst dich nun anmelden.";
+        usernameInput.value = "";
+        passwordInput.value = "";
+      }
+    }
   });
 </script>
 
 </body>
 </html>
+
 
